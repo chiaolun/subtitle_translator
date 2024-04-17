@@ -14,20 +14,31 @@ for that line, in traditional chinese.
 """
 
 
-def translate_sbv(input_sbv):
-    sections = [{
-        "ts": s.split("\n")[0],
-        "en": " ".join(s.split()[1:]),
-    } for s in (
-        input_sbv
-        .replace("\xa0\n", " ").split("\n\n")
+def parse_sbv(txt):
+    return [(
+        s.split("\n")[0],
+        " ".join(s.split()[1:]),
+    ) for s in (
+        txt.replace("\xa0\n", " ").split("\n\n")
     )]
+
+
+def translate_sbv(input_sbv, output_sbv=None):
+    sections = [dict(ts=ts, en=en) for ts, en in parse_sbv(input_sbv)]
     prefix = [
         dict(role="system", content="You are a helpful assistant."),
         dict(role="user", content=PROMPT),
         dict(role="assistant", content="Understood, ready to proceed."),
     ]
     results = []
+    if output_sbv is not None:
+        results = [
+            {"ts": ts, "en": d["en"], "zh-tw": zh_tw}
+            for d, (ts, zh_tw) in
+            zip(sections, parse_sbv(output_sbv))
+        ]
+        sections = sections[len(results):]
+
     for r in tqdm(sections):
         results.append(r.copy())
         messages = prefix.copy()
@@ -46,7 +57,7 @@ def translate_sbv(input_sbv):
         )
         reply = completion.choices[0].message.to_dict()["content"]
         results[-1]["zh-tw"] = reply
-        # tqdm.write(pformat(results[-1]))
+        tqdm.write(pformat(results[-1]))
 
     output_sbv = "\n\n".join([
         l["ts"] + "\n" + "\xa0\n".join(
@@ -63,8 +74,9 @@ output_path.mkdir(exist_ok=True)
 for input_file in tqdm(input_path.rglob("*.sbv")):
     output_file = output_path / input_file.relative_to(input_path)
     if output_file.exists():
-        print(output_file, "exists, skipping")
-        continue
+        output_sbv = output_file.open().read()
+    else:
+        output_sbv = None
     input_sbv = input_file.open().read()
-    output_sbv = translate_sbv(input_sbv)
+    output_sbv = translate_sbv(input_sbv, output_sbv=output_sbv)
     output_file.write_text(output_sbv)
