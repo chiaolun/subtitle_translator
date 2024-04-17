@@ -16,8 +16,8 @@ for that line, in traditional chinese.
 
 def translate_sbv(input_sbv):
     sections = [{
-        "ts": s[:24].strip(),
-        "en": " ".join(s[24:].split()),
+        "ts": s.split("\n")[0],
+        "en": " ".join(s.split()[1:]),
     } for s in (
         input_sbv
         .replace("\xa0\n", " ").split("\n\n")
