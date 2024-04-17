@@ -54,7 +54,7 @@ def translate_sbv(input_sbv, output_sbv=None):
             model="gpt-3.5-turbo",
             messages=messages,
         )
-        reply = completion.choices[0].message.to_dict()["content"]
+        reply = completion.choices[0].message.content
         results[-1]["zh-tw"] = reply
         tqdm.write(pformat(results[-1]))
 
