@@ -52,7 +52,6 @@ def translate_sbv(input_sbv, output_sbv=None):
                 )
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            temperature=0.,
             messages=messages,
         )
         reply = completion.choices[0].message.to_dict()["content"]
