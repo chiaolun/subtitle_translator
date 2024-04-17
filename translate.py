@@ -10,7 +10,9 @@ client = OpenAI()
 
 PROMPT = """Please translate some subtitles for me, line by line. I
 will feed you one line at a time, please return only the translation
-for that line, in traditional chinese.
+for that line, in traditional chinese. Map punctuation precisely as
+the way it continues is important
+
 """
 
 
